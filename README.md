@@ -1,14 +1,12 @@
 # CENTIC AUTO REFF
-![12 01 2025_05 55 10_REC](https://github.com/user-attachments/assets/e0ae52b4-aefe-4a19-a73e-0b304ba81af9)
-![12 01 2025_05 56 01_REC](https://github.com/user-attachments/assets/4a9ebb20-0ad2-414d-ad1b-7d8abe8d294f)
 
 # Register
-- https://centic.io/quests/daily?refferalCode=eJwFwQENADAIAzBLO5Ad7LCAhst_i1cohmQ13olAbe89WHmMkZHStPF-9GgLdg==
+- https://centic.io/quests/daily?refferalCode=eJwFwYENACAIA7CXFoiynQMoN3i-LZ6rB8yDdFd1BKllJyi7OUCltsfoA_r_C4M=
 
 # How to run
 
 ```
-git clone https://github.com/AirdropFamilyIDN-V2-0/centic.git
+git clone https://github.com/cuansegar/centic.git
 ```
 ```
 cd centic
