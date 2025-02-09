@@ -6,13 +6,7 @@
 # How to run
 
 ```
-git clone https://github.com/cuansegar/centic.git
-```
-```
-cd centic
-```
-```
-npm install axios web3
+git clone https://github.com/cuansegar/centic.git && cd centic && npm install axios web3
 ```
 ```
 node index.js
