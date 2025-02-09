@@ -10,10 +10,9 @@ const STATIC_API_KEY = 'dXoriON31OO1UopGakYO9f3tX2c4q3oO7mNsjB2nJsKnW406';
 
 // Tambahkan banner
 console.log(`
-========================
-| Auto Referral Centic |
-| @AirdropFamilyIdn    |
-========================
+======================================
+| Auto Referral Centic by Cuan Segar | 
+====================================== 
 `);
 
 // Function to validate private key
@@ -69,23 +68,31 @@ async function login(privateKey) {
     signature
   };
 
-  try {
-    const response = await axios.post('https://develop.centic.io/dev/v3/auth/login', payload, {
-      headers: {
-        'x-apikey': STATIC_API_KEY
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const response = await axios.post('https://develop.centic.io/dev/v3/auth/login', payload, {
+        headers: {
+          'x-apikey': STATIC_API_KEY
+        }
+      });
+      console.log(`\n`);
+      const apiKey = response.data.apiKey;
+      if (!apiKey) {
+        console.error(`API key not found in response for address: ${address}`);
+        return null;
       }
-    });
-    console.log(`\n`);
-    const apiKey = response.data.apiKey;
-    if (!apiKey) {
-      console.error(`API key not found in response for address: ${address}`);
-      return null;
+      return { apiKey, address };
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        console.warn(`Too many requests. Waiting before retrying...`);
+        await delay(10000); // Tunggu 10 detik sebelum mencoba lagi
+      } else {
+        console.error(`Login failed for address: ${address}. Error:`, error.response ? error.response.data : error.message);
+        return null;
+      }
     }
-    return { apiKey, address };
-  } catch (error) {
-    console.error(`Login failed for address: ${address}. Error:`, error.response ? error.response.data : error.message);
-    return null;
   }
+  return null;
 }
 
 // Function to bind account with referral code
@@ -94,28 +101,36 @@ async function bindReferral(apiKey, referralCode, address, privateKey) {
     referralCode
   };
 
-  try {
-    const response = await axios.post('https://develop.centic.io/ctp-api/centic-points/invites', payload, {
-      headers: {
-        'x-apikey': apiKey
-      }
-    });
-    console.log(`Successfully bind account ${address} with referral code: ${referralCode}`);
-    
-    // Simpan privateKey dan address ke file akun.txt tanpa menimpa
-    fs.appendFile('privatekey.txt', `${privateKey}\n`, (err) => {
-      if (err) {
-        console.error('Gagal menyimpan ke privatekey.txt:', err);
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const response = await axios.post('https://develop.centic.io/ctp-api/centic-points/invites', payload, {
+        headers: {
+          'x-apikey': apiKey
+        }
+      });
+      console.log(`${SUCCESS_COLOR}Successfully bind account ${address} with referral code: ${referralCode}${RESET_COLOR}`);
+      
+      // Simpan privateKey dan address ke file akun.txt tanpa menimpa
+      fs.appendFile('privatekey.txt', `${privateKey}\n`, (err) => {
+        if (err) {
+          console.error(`${ERROR_COLOR}Gagal menyimpan ke privatekey.txt:${RESET_COLOR}`, err);
+        } else {
+          console.log(`${SUCCESS_COLOR}Berhasil menyimpan ke privatekey.txt${RESET_COLOR}`);
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        console.warn(`Too many requests. Waiting before retrying...`);
+        await delay(10000); // Tunggu 10 detik sebelum mencoba lagi
       } else {
-        console.log('Berhasil menyimpan ke privatekey.txt');
+        console.error(`${ERROR_COLOR}Failed to bind account ${address} with referral code: ${referralCode}. Error:${RESET_COLOR}`, error.response ? error.response.data : error.message);
+        return null;
       }
-    });
-    
-    return response.data;
-  } catch (error) {
-    console.error(`Failed to bind account ${address} with referral code: ${referralCode}. Error:`, error.response ? error.response.data : error.message);
-    return null;
+    }
   }
+  return null;
 }
 
 // Function to add delay
@@ -162,7 +177,7 @@ async function runBot(referralCode, referralInterval) {
         await bindReferral(apiKey, referralCode, loginAddress, privateKey);
 
       } catch (error) {
-        console.error(`Error processing private key: ${privateKey}. Error:`, error.message);
+        console.error(`${ERROR_COLOR}Error processing private key: ${privateKey}. Error:${RESET_COLOR}`, error.message);
       } finally {
         await delay(5000);
       }
@@ -170,6 +185,10 @@ async function runBot(referralCode, referralInterval) {
     await delay(5000); // Tambahkan jeda 10 detik di antara setiap iterasi
   }
 }
+
+const SUCCESS_COLOR = '\x1b[32m'; // Hijau
+const ERROR_COLOR = '\x1b[31m'; // Merah
+const RESET_COLOR = '\x1b[0m'; // Reset
 
 // Setup readline interface
 const rl = readline.createInterface({
@@ -196,7 +215,7 @@ const rl = readline.createInterface({
 
       // Run the bot with the specified referral code and referral interval
       runBot(referralCode, referralInterval).then(() => {
-        console.log('Bot selesai dijalankan.');
+        console.log(`${SUCCESS_COLOR}Bot selesai dijalankan.${RESET_COLOR}`);
         rl.close();
       });
     });
